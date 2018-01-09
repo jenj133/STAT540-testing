@@ -1,0 +1,81 @@
+---
+title: "Practice Assignment"
+author: "Jenn Ji"
+date: "January 7, 2018"
+output: 
+  html_document: 
+    keep_md: yes
+---
+```{r setup, include = FALSE}
+library(tidyverse)
+```
+
+### Passenger Breakdown
+```{r, echo = FALSE}
+tf = data.frame(Titanic) #turn dataset into dataframe
+Nchildren = 
+  tf %>% #pipe function used to chain several operations on dataset "tf"
+  subset(Age =="Child") %>% #subsetting "tf" by Age = child
+  summarize(sum(Freq)) #sum of the frequency returns number of child 
+Nadults = 
+  tf %>%
+  subset(Age=="Adult") %>%
+  summarize(sum(Freq))
+NFemale = 
+  tf %>%
+  subset(Sex=="Female") %>%
+  summarize(sum(Freq))
+NMale = 
+  tf %>%
+  subset(Sex == "Male") %>%
+  summarize(sum(Freq))
+```
+
+There were `r Nchildren` children on the titianic 
+There were `r Nadults` adults on the titanic
+
+There were `r NFemale` females and `r NMale` males on the Titanic.Therefore, there were more males than females on the Titanic.
+
+### Survival based on age 
+```{r, echo = FALSE}
+AliveC = 
+  tf %>% #pipe function used to chain several operations on dataset "tf"
+  subset(Age=="Child" & Survived=="Yes") %>% #subset data "tf" for children who have survived
+  summarize(sum(Freq))
+            
+AliveA = 
+  tf %>%
+  subset(Age=="Adult" & Survived=="Yes") %>%
+  summarize(sum(Freq)) 
+
+Survchild = round(AliveC/Nchildren*100,digits=2)  #percentage of children survived, rounded to 2 decimal places
+Survadult = round(AliveA/Nadults*100, digits=2)  
+```
+
+`r Survchild`% of children survived on the Titanic, whereas `r Survadult`% of adults survived.The children had a better survival rate compared to adults. 
+
+### Survival based on class
+
+The survival rate for each class is shown below:
+```{r, echo = FALSE}
+t1 =  #table 1
+  tf %>%
+  group_by(Class)%>% #group by class
+  summarise("Total Number" = sum(Freq)) # generate table containing total number of passengers subset by class
+t2 = #table 2
+  tf %>%
+  subset(Survived=="Yes") %>% #subset data to only contain survived passengers
+  group_by(Class) %>% # Group by class
+  summarize(Survived = sum(Freq)) # generate table containing survived number of passengers by class
+
+t3 = merge(t2,t1,by="Class") #merge tables 1 and 2, keep first column - Class
+tf2 = data.frame(t3) #turn table into dataframe
+
+tf2$"Survival rate" <- round(tf2$Survived/tf2$Total.Number*100,digits=2) # add an column named survival rate containing the rate of survival to 2 decimal places (Survived/total number)
+
+knitr::kable(tf2) #print this table when Knitted
+```
+
+As shown by above table, first class had the highest survival rate.
+
+### Data Visualization
